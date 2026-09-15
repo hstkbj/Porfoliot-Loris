@@ -203,17 +203,17 @@ CREATE POLICY "Public active skills read" ON public.skills FOR SELECT USING (act
 CREATE POLICY "Public service_requests insert" ON public.service_requests FOR INSERT WITH CHECK (true);
 CREATE POLICY "Public contact_messages insert" ON public.contact_messages FOR INSERT WITH CHECK (true);
 
--- Admin authenticated full access policies
-CREATE POLICY "Admin profiles full" ON public.profiles FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "Admin site_settings full" ON public.site_settings FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "Admin projects full" ON public.projects FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "Admin project_media full" ON public.project_media FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "Admin services full" ON public.services FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "Admin service_requests full" ON public.service_requests FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "Admin contact_messages full" ON public.contact_messages FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "Admin resume full" ON public.resume FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "Admin social_links full" ON public.social_links FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "Admin skills full" ON public.skills FOR ALL TO authenticated USING (true) WITH CHECK (true);
+-- Admin full access policies (both authenticated and anon for single-user studio portfolio management)
+CREATE POLICY "Admin profiles full" ON public.profiles FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin site_settings full" ON public.site_settings FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin projects full" ON public.projects FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin project_media full" ON public.project_media FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin services full" ON public.services FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin service_requests full" ON public.service_requests FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin contact_messages full" ON public.contact_messages FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin resume full" ON public.resume FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin social_links full" ON public.social_links FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin skills full" ON public.skills FOR ALL USING (true) WITH CHECK (true);
 
 -- ==============================================================================
 -- STORAGE BUCKETS SETUP

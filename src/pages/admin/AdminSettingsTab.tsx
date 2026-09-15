@@ -84,6 +84,9 @@ export function AdminSettingsTab() {
     defaultValues: {
       site_name: '',
       site_description: '',
+      seo_title: '',
+      seo_description: '',
+      primary_color: '#f59e0b',
       contact_email: '',
       contact_phone: '',
       location: '',
@@ -94,12 +97,15 @@ export function AdminSettingsTab() {
   useEffect(() => {
     if (settings) {
       reset({
-        site_name: settings.site_name,
-        site_description: settings.site_description,
-        contact_email: settings.contact_email,
+        site_name: settings.site_name || '',
+        site_description: settings.site_description || '',
+        seo_title: settings.seo_title || settings.site_name || '',
+        seo_description: settings.seo_description || settings.site_description || '',
+        primary_color: settings.primary_color || '#f59e0b',
+        contact_email: settings.contact_email || '',
         contact_phone: settings.contact_phone || '',
         location: settings.location || '',
-        copyright_text: settings.copyright_text,
+        copyright_text: settings.copyright_text || '',
       });
 
       if (settings.budget_tiers && settings.budget_tiers.length > 0) {

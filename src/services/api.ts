@@ -111,65 +111,117 @@ function migrateRequests(requests: ServiceRequest[]): ServiceRequest[] {
 export const api = {
   // 1. PROFILE
   async getProfile(): Promise<Profile> {
+    const local = getLocalItem<Profile>(STORAGE_KEYS.PROFILE, initialProfile);
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('profiles').select('*').limit(1).single();
-      if (!error && data) return data as Profile;
+      try {
+        const { data, error } = await supabase.from('profiles').select('*').limit(1).single();
+        if (!error && data) {
+          const localUpdated = local.updated_at ? new Date(local.updated_at).getTime() : 0;
+          const remoteUpdated = data.updated_at ? new Date(data.updated_at).getTime() : 0;
+          if (localUpdated > remoteUpdated) {
+            return local;
+          }
+          setLocalItem(STORAGE_KEYS.PROFILE, data);
+          return data as Profile;
+        }
+      } catch (err) {
+        console.warn('Supabase getProfile error:', err);
+      }
     }
-    return getLocalItem<Profile>(STORAGE_KEYS.PROFILE, initialProfile);
+    return local;
   },
 
   async updateProfile(profile: Partial<Profile>): Promise<Profile> {
+    const current = await this.getProfile();
+    const updatedLocal = { ...current, ...profile, updated_at: new Date().toISOString() };
+    setLocalItem(STORAGE_KEYS.PROFILE, updatedLocal);
+
     if (isSupabaseConfigured && supabase) {
-      const current = await this.getProfile();
-      const { data, error } = await supabase
-        .from('profiles')
-        .update({ ...profile, updated_at: new Date().toISOString() })
-        .eq('id', current.id)
-        .select()
-        .single();
-      if (!error && data) return data as Profile;
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .update({ ...profile, updated_at: updatedLocal.updated_at })
+          .eq('id', current.id)
+          .select()
+          .single();
+        if (!error && data) {
+          setLocalItem(STORAGE_KEYS.PROFILE, data);
+          return data as Profile;
+        }
+        if (error) {
+          console.warn('Supabase updateProfile error (changes kept in local storage):', error);
+        }
+      } catch (err) {
+        console.warn('Supabase updateProfile network error:', err);
+      }
     }
-    const current = getLocalItem<Profile>(STORAGE_KEYS.PROFILE, initialProfile);
-    const updated = { ...current, ...profile, updated_at: new Date().toISOString() };
-    setLocalItem(STORAGE_KEYS.PROFILE, updated);
-    return updated;
+
+    return updatedLocal;
   },
 
   // 2. SITE SETTINGS
   async getSiteSettings(): Promise<SiteSettings> {
+    const local = getLocalItem<SiteSettings>(STORAGE_KEYS.SETTINGS, initialSiteSettings);
+    if (!local.budget_tiers || !local.budget_tiers.length || local.budget_tiers.some((t) => t.includes('€') || t.includes('3 000 000'))) {
+      local.budget_tiers = DEFAULT_BUDGET_TIERS;
+      setLocalItem(STORAGE_KEYS.SETTINGS, local);
+    }
+
     if (isSupabaseConfigured && supabase) {
-      const { data, error } = await supabase.from('site_settings').select('*').limit(1).single();
-      if (!error && data) {
-        return {
-          ...initialSiteSettings,
-          ...data,
-          budget_tiers: data.budget_tiers?.length ? data.budget_tiers : DEFAULT_BUDGET_TIERS,
-        } as SiteSettings;
+      try {
+        const { data, error } = await supabase.from('site_settings').select('*').limit(1).single();
+        if (!error && data) {
+          const localUpdated = local.updated_at ? new Date(local.updated_at).getTime() : 0;
+          const remoteUpdated = data.updated_at ? new Date(data.updated_at).getTime() : 0;
+          if (localUpdated > remoteUpdated) {
+            return local;
+          }
+          const merged: SiteSettings = {
+            ...initialSiteSettings,
+            ...data,
+            budget_tiers: data.budget_tiers?.length ? data.budget_tiers : DEFAULT_BUDGET_TIERS,
+          };
+          setLocalItem(STORAGE_KEYS.SETTINGS, merged);
+          return merged;
+        }
+      } catch (err) {
+        console.warn('Supabase getSiteSettings error:', err);
       }
     }
-    const settings = getLocalItem<SiteSettings>(STORAGE_KEYS.SETTINGS, initialSiteSettings);
-    if (!settings.budget_tiers || !settings.budget_tiers.length || settings.budget_tiers.some((t) => t.includes('€') || t.includes('3 000 000'))) {
-      settings.budget_tiers = DEFAULT_BUDGET_TIERS;
-      setLocalItem(STORAGE_KEYS.SETTINGS, settings);
-    }
-    return settings;
+    return local;
   },
 
   async updateSiteSettings(settings: Partial<SiteSettings>): Promise<SiteSettings> {
+    const current = await this.getSiteSettings();
+    const updatedLocal = { ...current, ...settings, updated_at: new Date().toISOString() };
+    setLocalItem(STORAGE_KEYS.SETTINGS, updatedLocal);
+
     if (isSupabaseConfigured && supabase) {
-      const current = await this.getSiteSettings();
-      const { data, error } = await supabase
-        .from('site_settings')
-        .update({ ...settings, updated_at: new Date().toISOString() })
-        .eq('id', current.id)
-        .select()
-        .single();
-      if (!error && data) return data as SiteSettings;
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .update({ ...settings, updated_at: updatedLocal.updated_at })
+          .eq('id', current.id)
+          .select()
+          .single();
+        if (!error && data) {
+          const merged: SiteSettings = {
+            ...initialSiteSettings,
+            ...data,
+            budget_tiers: data.budget_tiers?.length ? data.budget_tiers : DEFAULT_BUDGET_TIERS,
+          };
+          setLocalItem(STORAGE_KEYS.SETTINGS, merged);
+          return merged;
+        }
+        if (error) {
+          console.warn('Supabase updateSiteSettings error (changes kept in local storage):', error);
+        }
+      } catch (err) {
+        console.warn('Supabase updateSiteSettings network error:', err);
+      }
     }
-    const current = getLocalItem<SiteSettings>(STORAGE_KEYS.SETTINGS, initialSiteSettings);
-    const updated = { ...current, ...settings, updated_at: new Date().toISOString() };
-    setLocalItem(STORAGE_KEYS.SETTINGS, updated);
-    return updated;
+
+    return updatedLocal;
   },
 
   // 3. PROJECTS

@@ -93,15 +93,15 @@ export type ProfileFormData = any;
 
 export const siteSettingsSchema = z.object({
   site_name: z.string().min(2, 'Nom du site requis'),
-  site_description: z.string().min(10, 'Description requise'),
+  site_description: z.string().min(5, 'Description requise'),
   logo_url: z.string().optional().or(z.literal('')),
   favicon_url: z.string().optional().or(z.literal('')),
-  seo_title: z.string().min(2, 'Titre SEO requis'),
-  seo_description: z.string().min(10, 'Description SEO requise'),
-  primary_color: z.string().regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'Couleur hexadécimale valide requise (ex: #f59e0b)'),
+  seo_title: z.string().optional().or(z.literal('')),
+  seo_description: z.string().optional().or(z.literal('')),
+  primary_color: z.string().optional().or(z.literal('')),
   contact_email: z.string().email('Email de contact valide requis'),
-  contact_phone: z.string().min(6, 'Téléphone requis'),
-  location: z.string().min(2, 'Localisation requise'),
+  contact_phone: z.string().optional().or(z.literal('')),
+  location: z.string().optional().or(z.literal('')),
   copyright_text: z.string().min(2, 'Texte de copyright requis'),
   budget_tiers: z.array(z.string()).optional(),
 });
