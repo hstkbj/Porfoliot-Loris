@@ -3,12 +3,13 @@
 -- Portfolio Professionnel - Monteur Vidéo & Motion Designer
 -- ==============================================================================
 
--- Enable UUID extension
+-- Enable UUID extension (pgcrypto provides gen_random_uuid, built-in in modern PostgreSQL)
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. PROFILES
 CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   professional_name TEXT NOT NULL,
@@ -29,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 -- 2. SITE_SETTINGS
 CREATE TABLE IF NOT EXISTS public.site_settings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   site_name TEXT NOT NULL,
   site_description TEXT NOT NULL,
   logo_url TEXT,
@@ -48,7 +49,7 @@ CREATE TABLE IF NOT EXISTS public.site_settings (
 
 -- 3. PROJECTS
 CREATE TABLE IF NOT EXISTS public.projects (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   short_description TEXT NOT NULL,
@@ -73,7 +74,7 @@ CREATE INDEX IF NOT EXISTS idx_projects_display_order ON public.projects(display
 
 -- 4. PROJECT_MEDIA
 CREATE TABLE IF NOT EXISTS public.project_media (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
   media_type TEXT NOT NULL CHECK (media_type IN ('image', 'video')),
   media_url TEXT NOT NULL,
@@ -87,7 +88,7 @@ CREATE INDEX IF NOT EXISTS idx_project_media_project_id ON public.project_media(
 
 -- 5. SERVICES
 CREATE TABLE IF NOT EXISTS public.services (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   description TEXT NOT NULL,
@@ -106,7 +107,7 @@ CREATE INDEX IF NOT EXISTS idx_services_order ON public.services(display_order);
 
 -- 6. SERVICE_REQUESTS
 CREATE TABLE IF NOT EXISTS public.service_requests (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   full_name TEXT NOT NULL,
   email TEXT NOT NULL,
   phone TEXT NOT NULL,
@@ -127,7 +128,7 @@ CREATE INDEX IF NOT EXISTS idx_service_requests_created_at ON public.service_req
 
 -- 7. CONTACT_MESSAGES
 CREATE TABLE IF NOT EXISTS public.contact_messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   email TEXT NOT NULL,
   phone TEXT,
@@ -143,7 +144,7 @@ CREATE INDEX IF NOT EXISTS idx_contact_messages_created_at ON public.contact_mes
 
 -- 8. RESUME
 CREATE TABLE IF NOT EXISTS public.resume (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   file_name TEXT NOT NULL,
   file_url TEXT NOT NULL,
   uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -152,7 +153,7 @@ CREATE TABLE IF NOT EXISTS public.resume (
 
 -- 9. SOCIAL_LINKS
 CREATE TABLE IF NOT EXISTS public.social_links (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   platform TEXT NOT NULL,
   url TEXT NOT NULL,
   active BOOLEAN NOT NULL DEFAULT true,
@@ -163,7 +164,7 @@ CREATE TABLE IF NOT EXISTS public.social_links (
 
 -- 10. SKILLS
 CREATE TABLE IF NOT EXISTS public.skills (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   category TEXT NOT NULL,
   level INTEGER NOT NULL DEFAULT 90,

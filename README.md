@@ -183,11 +183,77 @@ Pour permettre l'hébergement direct des images de vos projets et vidéos :
 | `npx supabase login` | Authentifie votre machine avec Supabase |
 | `npx supabase link --project-ref <id>` | Relie le dossier local au projet Supabase |
 | `npx supabase db push` | Pousse les migrations locales vers la base Supabase |
+| `npx vercel` | Déploie le projet sur Vercel via la CLI |
+
+---
+
+## 🚀 7. Déploiement sur Vercel
+
+Le projet est entièrement préparé pour un déploiement instantané et sans erreur sur **Vercel**.
+
+### A. Configuration SPA automatique (`vercel.json`)
+Le fichier `vercel.json` à la racine gère la redirection de toutes les routes vers `/index.html`. Sans ce fichier, naviguer ou rafraîchir la page sur `/admin`, `/demande` ou `/projets` provoquerait une erreur **404 NOT_FOUND** sur Vercel. Grâce à `vercel.json`, la navigation React Router fonctionne de manière fluide et transparente.
+
+### B. Méthode 1 : Déploiement via GitHub (Recommandé)
+
+1. **Pousser votre code sur un dépôt GitHub** :
+   ```bash
+   git add .
+   git commit -m "feat: portfolio videaste prêt pour production et Supabase"
+   git push origin main
+   ```
+
+2. **Importer le projet sur Vercel** :
+   - Connectez-vous sur [https://vercel.com](https://vercel.com).
+   - Cliquez sur **« Add New... »** > **« Project »**.
+   - Sélectionnez votre dépôt GitHub et cliquez sur **« Import »**.
+
+3. **Paramètres de Build & Framework** :
+   - **Framework Preset** : `Vite` (détecté automatiquement).
+   - **Build Command** : `npm run build`
+   - **Output Directory** : `dist`
+
+4. **Ajouter les Variables d'Environnement** :
+   - Déroulez la section **« Environment Variables »**.
+   - Ajoutez les 2 variables :
+     - `VITE_SUPABASE_URL` = `https://<votre-project-ref>.supabase.co`
+     - `VITE_SUPABASE_ANON_KEY` = `<votre-cle-anon-publique>`
+   - Cliquez sur **« Deploy »**.
+
+---
+
+### C. Méthode 2 : Déploiement rapide en ligne de commande (Vercel CLI)
+
+Si vous préférez déployer directement depuis votre terminal :
+
+```bash
+# 1. Lancer le déploiement
+npx vercel
+
+# 2. Répondre aux questions interactives :
+# - Set up and deploy? [Y]
+# - Which scope? [Votre compte]
+# - Link to existing project? [N]
+# - Project name? [portfolio-videaste]
+# - In which directory is your code located? [./]
+# - Want to modify build settings? [N]
+
+# 3. Ajouter les variables d'environnement sur Vercel
+npx vercel env add VITE_SUPABASE_URL
+npx vercel env add VITE_SUPABASE_ANON_KEY
+
+# 4. Déployer en production finale
+npx vercel --prod
+```
+
+Votre site est instantanément en ligne avec HTTPS, CDN mondial ultra-rapide et connexion directe à votre base de données Supabase !
 
 ---
 
 ## ❓ Foire Aux Questions & Dépannage
 
+- **Erreur `function uuid_generate_v4() does not exist` résolue** :  
+  Dans les versions récentes de PostgreSQL et Supabase, l'extension `uuid-ossp` peut être dans le schéma `extensions` ou inactive. La migration utilise désormais **`gen_random_uuid()`**, la fonction standard native intégrée à PostgreSQL. Vous pouvez relancer `npx supabase db push` sans aucune erreur.
 - **Comment trouver mon `project-ref` ?**  
   Dans l'URL de votre tableau de bord Supabase : `https://supabase.com/dashboard/project/<project-ref>`. C'est la série de lettres et chiffres qui identifie votre projet.
 - **Les modifications sont-elles perdues si je n'ai pas configuré Supabase ?**  
