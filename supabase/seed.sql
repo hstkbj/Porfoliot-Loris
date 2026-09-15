@@ -51,11 +51,14 @@ BEGIN
       '',
       ''
     );
+  END IF;
 
-    -- Enregistrement de l'identité dans auth.identities
+  -- Enregistrement de l'identité dans auth.identities
+  IF NOT EXISTS (SELECT 1 FROM auth.identities WHERE user_id = admin_uid) THEN
     INSERT INTO auth.identities (
       id,
       user_id,
+      provider_id,
       identity_data,
       provider,
       last_sign_in_at,
@@ -64,6 +67,7 @@ BEGIN
     ) VALUES (
       admin_uid,
       admin_uid,
+      admin_uid::text,
       format('{"sub":"%s","email":"%s"}', admin_uid::text, admin_email)::jsonb,
       'email',
       NOW(),
