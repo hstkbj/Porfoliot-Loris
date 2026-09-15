@@ -65,7 +65,7 @@ BEGIN
       created_at,
       updated_at
     ) VALUES (
-      admin_uid::text,
+      admin_uid,
       admin_uid,
       admin_uid::text,
       format('{"sub":"%s","email":"%s"}', admin_uid::text, admin_email)::jsonb,
