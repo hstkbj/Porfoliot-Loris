@@ -65,7 +65,7 @@ BEGIN
       created_at,
       updated_at
     ) VALUES (
-      admin_uid,
+      admin_uid::text,
       admin_uid,
       admin_uid::text,
       format('{"sub":"%s","email":"%s"}', admin_uid::text, admin_email)::jsonb,
@@ -194,9 +194,13 @@ VALUES
   )
 ON CONFLICT (id) DO UPDATE SET
   title = EXCLUDED.title,
+  slug = EXCLUDED.slug,
   description = EXCLUDED.description,
+  icon = EXCLUDED.icon,
   indicative_price = EXCLUDED.indicative_price,
-  indicative_duration = EXCLUDED.indicative_duration;
+  indicative_duration = EXCLUDED.indicative_duration,
+  active = EXCLUDED.active,
+  display_order = EXCLUDED.display_order;
 
 -- 5. PROJETS DE RÉALISATION
 -- ==============================================================================
@@ -274,7 +278,7 @@ INSERT INTO public.projects (
     'vortex-formula-recapitulatif-grand-prix',
     'Aftermovie à haute intensité adrenaline avec transitions dynamiques, speed-ramping et effets sonores percutants.',
     'Montage multicaméra haute vitesse couvrant les 3 jours d''épreuves. Sound design de moteurs et de radio de bord retranscrit en stéréo binaurale.',
-    'Événementiel',
+    'Montage vidéo',
     'Vortex Racing League',
     2024,
     'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1200&q=80',
@@ -290,7 +294,7 @@ INSERT INTO public.projects (
     'pulse-fitness-serie-social-media',
     'Package de 15 formats verticaux (Reels/Shorts) optimisés pour la rétention et l''acquisition mobile.',
     'Sous-titrages cinématiques animés mot-à-mot, sound design punchy et transitions d''action synchronisées aux mouvements du coach.',
-    'Social Media',
+    'Réseaux sociaux',
     'Pulse Club',
     2024,
     'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=1200&q=80',
@@ -302,26 +306,37 @@ INSERT INTO public.projects (
   )
 ON CONFLICT (id) DO UPDATE SET
   title = EXCLUDED.title,
+  slug = EXCLUDED.slug,
   short_description = EXCLUDED.short_description,
   description = EXCLUDED.description,
   category = EXCLUDED.category,
-  tools = EXCLUDED.tools;
+  client = EXCLUDED.client,
+  year = EXCLUDED.year,
+  thumbnail_url = EXCLUDED.thumbnail_url,
+  video_url = EXCLUDED.video_url,
+  tools = EXCLUDED.tools,
+  featured = EXCLUDED.featured,
+  published = EXCLUDED.published,
+  display_order = EXCLUDED.display_order;
 
 -- 6. COMPÉTENCES TECHNIQUES (SKILLS)
 -- ==============================================================================
-INSERT INTO public.skills (id, name, category, level, icon, display_order)
+INSERT INTO public.skills (id, name, category, level, display_order, active)
 VALUES
-  ('55555555-5555-5555-5555-555555555501', 'Premiere Pro', 'Logiciels', 98, 'Film', 1),
-  ('55555555-5555-5555-5555-555555555502', 'After Effects', 'Logiciels', 95, 'Sparkles', 2),
-  ('55555555-5555-5555-5555-555555555503', 'DaVinci Resolve', 'Logiciels', 92, 'Palette', 3),
-  ('55555555-5555-5555-5555-555555555504', 'Cinema 4D', 'Logiciels', 80, 'Box', 4),
-  ('55555555-5555-5555-5555-555555555505', 'Sound Design & Mixage', 'Savoir-faire', 94, 'Volume2', 5),
-  ('55555555-5555-5555-5555-555555555506', 'Étalonnage & Color Grading', 'Savoir-faire', 90, 'Sun', 6),
-  ('55555555-5555-5555-5555-555555555507', 'Storytelling & Rythme', 'Savoir-faire', 96, 'HeartHandshake', 7),
-  ('55555555-5555-5555-5555-555555555508', 'Formats Courts & Rétention', 'Savoir-faire', 95, 'TrendingUp', 8)
+  ('55555555-5555-5555-5555-555555555501', 'Adobe Premiere Pro', 'Logiciel', 98, 1, true),
+  ('55555555-5555-5555-5555-555555555502', 'Adobe After Effects', 'Logiciel', 95, 2, true),
+  ('55555555-5555-5555-5555-555555555503', 'DaVinci Resolve & Fusion', 'Logiciel', 90, 3, true),
+  ('55555555-5555-5555-5555-555555555504', 'Cinema 4D / Blender', 'Logiciel', 82, 4, true),
+  ('55555555-5555-5555-5555-555555555505', 'Montage Rythmique & Narratif', 'Montage', 96, 5, true),
+  ('55555555-5555-5555-5555-555555555506', 'Animation Typographique (Kinetic)', 'Motion Design', 94, 6, true),
+  ('55555555-5555-5555-5555-555555555507', 'Sound Design & Mixage Audio', 'Audio & Étalonnage', 92, 7, true),
+  ('55555555-5555-5555-5555-555555555508', 'Étalonnage Chromatique (Color Grading)', 'Audio & Étalonnage', 88, 8, true)
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
-  level = EXCLUDED.level;
+  category = EXCLUDED.category,
+  level = EXCLUDED.level,
+  display_order = EXCLUDED.display_order,
+  active = EXCLUDED.active;
 
 -- 7. LIENS SOCIAUX
 -- ==============================================================================
@@ -332,48 +347,60 @@ VALUES
   ('66666666-6666-6666-6666-666666666603', 'Instagram', 'https://instagram.com', true, 3),
   ('66666666-6666-6666-6666-666666666604', 'LinkedIn', 'https://linkedin.com', true, 4)
 ON CONFLICT (id) DO UPDATE SET
-  url = EXCLUDED.url;
+  platform = EXCLUDED.platform,
+  url = EXCLUDED.url,
+  active = EXCLUDED.active,
+  display_order = EXCLUDED.display_order;
 
--- 8. EXEMPLES DE DEMANDES DE DEVIS (EN XOF)
+-- 8. CURRICULUM VITAE (RESUME)
+-- ==============================================================================
+INSERT INTO public.resume (id, file_name, file_url)
+VALUES (
+  '77777777-7777-7777-7777-777777777777',
+  'CV_Alexandre_Roche_Monteur_MotionDesigner.pdf',
+  'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
+) ON CONFLICT (id) DO NOTHING;
+
+-- 9. EXEMPLES DE DEMANDES DE DEVIS (EN XOF)
 -- ==============================================================================
 INSERT INTO public.service_requests (
-  id, full_name, email, phone, company, project_type, budget_range, deadline, message, status, created_at
+  id, full_name, email, phone, company, service_id, budget, desired_date, description, status, created_at
 ) VALUES
   (
-    '77777777-7777-7777-7777-777777777701',
+    '88888888-8888-8888-8888-888888888801',
     'Amadou Traoré',
     'amadou.traore@nova-tech.sn',
     '+221 77 555 12 34',
     'NovaTech Solutions',
-    'Vidéo corporate',
+    '33333333-3333-3333-3333-333333333304',
     '250 000 - 500 000 XOF',
     'Sous 3 semaines',
     'Bonjour Alexandre, nous recherchons un monteur pour finaliser notre film de présentation annuel (environ 2 min 30). Les rushes 4K sont déjà tournés.',
-    'nouveau',
+    'Nouvelle',
     NOW() - INTERVAL '2 days'
   ),
   (
-    '77777777-7777-7777-7777-777777777702',
+    '88888888-8888-8888-8888-888888888802',
     'Fatou Diop',
     'fatou@lumina-creatives.com',
     '+225 07 88 99 00',
     'Lumina Agency',
-    'Motion design',
+    '33333333-3333-3333-3333-333333333302',
     '100 000 - 250 000 XOF',
     'Urgent (sous 10 jours)',
     'Bonjour, nous avons besoin d''une animation 2D de 45 secondes pour expliquer le fonctionnement de notre nouvelle application mobile.',
-    'en_cours',
+    'En cours',
     NOW() - INTERVAL '5 days'
   )
 ON CONFLICT (id) DO NOTHING;
 
--- 9. EXEMPLES DE MESSAGES DE CONTACT
+-- 10. EXEMPLES DE MESSAGES DE CONTACT
 -- ==============================================================================
 INSERT INTO public.contact_messages (
   id, name, email, phone, subject, message, is_read, created_at
 ) VALUES
   (
-    '88888888-8888-8888-8888-888888888801',
+    '99999999-9999-9999-9999-999999999901',
     'Sarah Ndiaye',
     'sarah.ndiaye@artisan-agency.com',
     '+33 6 12 34 56 78',
