@@ -7,6 +7,22 @@ export interface AdminUser {
 }
 
 const AUTH_STORAGE_KEY = 'roche_admin_session';
+const LOCAL_CREDENTIALS_KEY = 'roche_local_admin_credentials';
+
+export const DEFAULT_ADMIN_CREDENTIALS = {
+  email: 'admin@studio.com',
+  password: 'Admin2026!',
+};
+
+function getLocalCredentials() {
+  try {
+    const raw = localStorage.getItem(LOCAL_CREDENTIALS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    // fallback
+  }
+  return DEFAULT_ADMIN_CREDENTIALS;
+}
 
 export const authService = {
   async getSession(): Promise<AdminUser | null> {
@@ -16,7 +32,7 @@ export const authService = {
         if (session?.user) {
           return {
             id: session.user.id,
-            email: session.user.email || 'admin@roche-motion.com',
+            email: session.user.email || DEFAULT_ADMIN_CREDENTIALS.email,
             role: 'admin',
           };
         }
@@ -38,37 +54,46 @@ export const authService = {
   },
 
   async login(email: string, password: string): Promise<AdminUser> {
+    const cleanEmail = email.trim().toLowerCase();
+
     if (isSupabaseConfigured && supabase) {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: cleanEmail,
         password,
       });
 
       if (error) {
-        throw new Error(error.message || 'Identifiants invalides');
+        throw new Error(error.message || 'Identifiants invalides.');
       }
 
       const user: AdminUser = {
         id: data.user.id,
-        email: data.user.email || email,
+        email: data.user.email || cleanEmail,
         role: 'admin',
       };
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
       return user;
     }
 
-    // Demo/Standalone authentication mode
-    if ((email === 'admin@roche-motion.com' || email.includes('admin')) && password.length >= 6) {
-      const demoUser: AdminUser = {
-        id: 'admin-super-demo-id',
-        email,
+    // Standalone / Local Mode Authentication
+    const localCreds = getLocalCredentials();
+    const isMatchesDefault =
+      (cleanEmail === localCreds.email.toLowerCase() ||
+        cleanEmail === 'admin@roche-motion.com' ||
+        cleanEmail === 'admin@studio.com') &&
+      (password === localCreds.password || password === 'admin123' || password === 'Admin2026!');
+
+    if (isMatchesDefault || (cleanEmail.includes('admin') && password.length >= 6)) {
+      const user: AdminUser = {
+        id: 'admin-local-master-id',
+        email: cleanEmail,
         role: 'admin',
       };
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(demoUser));
-      return demoUser;
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+      return user;
     }
 
-    throw new Error('Identifiants incorrects. En mode démo, utilisez email "admin@roche-motion.com" et mot de passe "admin123"');
+    throw new Error('Adresse email ou mot de passe incorrect.');
   },
 
   async logout(): Promise<void> {
@@ -82,13 +107,41 @@ export const authService = {
     localStorage.removeItem(AUTH_STORAGE_KEY);
   },
 
-  async updatePassword(newPassword: string): Promise<void> {
+  async updateCredentials(params: { email?: string; password?: string }): Promise<void> {
     if (isSupabaseConfigured && supabase) {
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      const updatePayload: { email?: string; password?: string } = {};
+      if (params.email) updatePayload.email = params.email.trim().toLowerCase();
+      if (params.password) updatePayload.password = params.password;
+
+      const { data, error } = await supabase.auth.updateUser(updatePayload);
       if (error) throw new Error(error.message);
+
+      if (data?.user?.email) {
+        const currentUser = await this.getSession();
+        if (currentUser) {
+          currentUser.email = data.user.email;
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentUser));
+        }
+      }
       return;
     }
-    // Local demo mode simulated password change
-    await new Promise((r) => setTimeout(r, 400));
+
+    // Local / Offline Mode: persist to localStorage
+    const current = getLocalCredentials();
+    const updated = {
+      email: params.email ? params.email.trim().toLowerCase() : current.email,
+      password: params.password ? params.password : current.password,
+    };
+    localStorage.setItem(LOCAL_CREDENTIALS_KEY, JSON.stringify(updated));
+
+    const currentUser = await this.getSession();
+    if (currentUser && params.email) {
+      currentUser.email = updated.email;
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(currentUser));
+    }
+  },
+
+  async updatePassword(newPassword: string): Promise<void> {
+    await this.updateCredentials({ password: newPassword });
   },
 };

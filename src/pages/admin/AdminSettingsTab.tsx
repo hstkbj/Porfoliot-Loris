@@ -12,6 +12,7 @@ import { useToast } from '../../components/ui/toast';
 import {
   Save,
   Lock,
+  Mail,
   ShieldCheck,
   Database,
   Coins,
@@ -54,12 +55,19 @@ const PRESET_TIERS = {
 export function AdminSettingsTab() {
   const { data: settings, isLoading } = useSiteSettings();
   const updateSettingsMutation = useUpdateSiteSettings();
-  const { updatePassword } = useAuth();
+  const { user, updateCredentials } = useAuth();
   const { toast } = useToast();
 
+  const [adminEmail, setAdminEmail] = useState(user?.email || 'admin@studio.com');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [credsLoading, setCredsLoading] = useState(false);
+
+  useEffect(() => {
+    if (user?.email) {
+      setAdminEmail(user.email);
+    }
+  }, [user?.email]);
 
   // Budget tiers state
   const [budgetTiers, setBudgetTiers] = useState<string[]>(DEFAULT_BUDGET_TIERS);
@@ -196,31 +204,47 @@ export function AdminSettingsTab() {
     }
   };
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const handleCredentialsChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.length < 6) {
+    const cleanEmail = adminEmail.trim().toLowerCase();
+
+    if (!cleanEmail || !cleanEmail.includes('@')) {
       toast({
-        title: 'Mot de passe trop court',
-        message: 'Le mot de passe doit contenir au moins 6 caractères.',
-        type: 'error',
-      });
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast({
-        title: 'Mots de passe différents',
-        message: 'Les deux mots de passe saisis ne correspondent pas.',
+        title: 'Email invalide',
+        message: 'Veuillez saisir une adresse email valide pour l’administrateur.',
         type: 'error',
       });
       return;
     }
 
-    setPasswordLoading(true);
+    if (newPassword) {
+      if (newPassword.length < 6) {
+        toast({
+          title: 'Mot de passe trop court',
+          message: 'Le mot de passe doit contenir au moins 6 caractères.',
+          type: 'error',
+        });
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        toast({
+          title: 'Mots de passe différents',
+          message: 'Les deux mots de passe saisis ne correspondent pas.',
+          type: 'error',
+        });
+        return;
+      }
+    }
+
+    setCredsLoading(true);
     try {
-      await updatePassword(newPassword);
+      await updateCredentials({
+        email: cleanEmail,
+        password: newPassword ? newPassword : undefined,
+      });
       toast({
-        title: 'Mot de passe mis à jour',
-        message: 'Votre nouveau mot de passe a été configuré avec succès.',
+        title: 'Identifiants mis à jour',
+        message: 'Vos identifiants administrateur ont été enregistrés avec succès.',
         type: 'success',
       });
       setNewPassword('');
@@ -228,11 +252,11 @@ export function AdminSettingsTab() {
     } catch (err: any) {
       toast({
         title: 'Erreur',
-        message: err?.message || 'Impossible de mettre à jour le mot de passe.',
+        message: err?.message || 'Impossible de mettre à jour les identifiants.',
         type: 'error',
       });
     } finally {
-      setPasswordLoading(false);
+      setCredsLoading(false);
     }
   };
 
@@ -515,35 +539,53 @@ export function AdminSettingsTab() {
         </div>
       </div>
 
-      {/* Change Password Card */}
-      <form onSubmit={handlePasswordChange} className="rounded-xl border border-zinc-800 bg-[#121417] p-6 space-y-4">
+      {/* Admin Credentials & Security Card */}
+      <form onSubmit={handleCredentialsChange} className="rounded-xl border border-zinc-800 bg-[#121417] p-6 space-y-4">
         <div className="flex items-center gap-2 text-zinc-200">
-          <Lock className="h-4 w-4 text-amber-400" />
+          <ShieldCheck className="h-4 w-4 text-amber-400" />
           <h3 className="font-display text-sm font-bold uppercase tracking-wider font-mono">
-            Sécurité — Mot de passe administrateur
+            Sécurité & Accès — Identifiants de connexion administrateur
           </h3>
         </div>
+        <p className="text-xs text-zinc-400">
+          Modifiez l'adresse email et le mot de passe requis pour accéder à l'espace d'administration.
+        </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-zinc-300">Email de connexion administrateur</label>
+          <div className="relative">
+            <Input
+              type="email"
+              value={adminEmail}
+              onChange={(e) => setAdminEmail(e.target.value)}
+              placeholder="admin@studio.com"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">Nouveau mot de passe</label>
+            <label className="text-xs font-medium text-zinc-300">
+              Nouveau mot de passe <span className="text-zinc-500 font-normal">(optionnel)</span>
+            </label>
             <Input
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="••••••••"
-              required
+              placeholder="Laisser vide pour ne pas changer"
             />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-zinc-300">Confirmer le nouveau mot de passe</label>
+            <label className="text-xs font-medium text-zinc-300">
+              Confirmer le nouveau mot de passe
+            </label>
             <Input
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-              required
+              placeholder="Confirmer si modifié"
             />
           </div>
         </div>
@@ -551,12 +593,12 @@ export function AdminSettingsTab() {
         <div className="flex justify-end pt-2">
           <Button
             type="submit"
-            variant="secondary"
+            variant="accent"
             size="sm"
-            isLoading={passwordLoading}
+            isLoading={credsLoading}
             className="text-xs"
           >
-            Mettre à jour mon mot de passe
+            Enregistrer mes nouveaux identifiants
           </Button>
         </div>
       </form>

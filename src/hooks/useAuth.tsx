@@ -7,6 +7,7 @@ interface AuthContextType {
   login: (email: string, pass: string) => Promise<AdminUser>;
   logout: () => Promise<void>;
   updatePassword: (pass: string) => Promise<void>;
+  updateCredentials: (params: { email?: string; password?: string }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -46,8 +47,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await authService.updatePassword(pass);
   };
 
+  const updateCredentials = async (params: { email?: string; password?: string }) => {
+    await authService.updateCredentials(params);
+    if (params.email && user) {
+      setUser({ ...user, email: params.email });
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout, updatePassword }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, updatePassword, updateCredentials }}>
       {children}
     </AuthContext.Provider>
   );

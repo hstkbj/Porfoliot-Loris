@@ -264,7 +264,7 @@ INSERT INTO public.profiles (
 -- Site settings
 INSERT INTO public.site_settings (
   id, site_name, site_description, logo_url, seo_title, seo_description,
-  primary_color, contact_email, contact_phone, location, copyright_text
+  primary_color, contact_email, contact_phone, location, copyright_text, budget_tiers
 ) VALUES (
   '22222222-2222-2222-2222-222222222222',
   'Roche Motion Studio',
@@ -276,16 +276,24 @@ INSERT INTO public.site_settings (
   'contact@roche-motion.com',
   '+33 6 42 19 88 05',
   'Paris, France & International (Remote)',
-  '© 2026 Roche Motion Studio. Tous droits réservés.'
+  '© 2026 Roche Motion Studio. Tous droits réservés.',
+  ARRAY[
+    'Moins de 50 000 XOF',
+    '50 000 - 100 000 XOF',
+    '100 000 - 250 000 XOF',
+    '250 000 - 500 000 XOF',
+    '500 000 - 1 000 000 XOF',
+    'Plus de 1 000 000 XOF'
+  ]::text[]
 ) ON CONFLICT (id) DO NOTHING;
 
 -- Services
 INSERT INTO public.services (id, title, slug, description, icon, indicative_price, indicative_duration, active, display_order)
 VALUES
-  ('33333333-3333-3333-3333-333333333301', 'Montage Vidéo Haut de Gamme', 'montage-video', 'Montage dynamique et structuré pour vos publicités, documentaires, films institutionnels ou productions web. Colorimétrie avancée et sound design inclus.', 'Film', 'À partir de 300 000 XOF', '3 à 7 jours de production', true, 1),
-  ('33333333-3333-3333-3333-333333333302', 'Motion Design & Animation 2D/3D', 'motion-design', 'Création d''animations graphiques percutantes, titrages cinématiques, explainer videos, infographies animées et identités en mouvement.', 'Sparkles', 'À partir de 350 000 XOF', '4 à 10 jours de production', true, 2),
-  ('33333333-3333-3333-3333-333333333303', 'Contenus Verticaux & Social Media', 'social-media', 'Reels, TikToks et Shorts calibrés pour maximiser l''engagement et le taux de complétion avec transitions millimétrées et sous-titrages animés sur-mesure.', 'Smartphone', 'À partir de 150 000 XOF', '24 à 48 heures', true, 3),
-  ('33333333-3333-3333-3333-333333333304', 'Vidéo Corporate & Événementiel', 'video-corporate', 'Valorisation de votre marque employeur, reportages d''entreprise, lancements de produit et aftermovies événementiels à forte valeur émotionnelle.', 'Building2', 'Sur devis personnalisé (XOF)', '5 à 12 jours de production', true, 4)
+  ('33333333-3333-3333-3333-333333333301', 'Montage Vidéo Haut de Gamme', 'montage-video', 'Montage dynamique et structuré pour vos publicités, documentaires, films institutionnels ou productions web. Colorimétrie avancée et sound design inclus.', 'Film', 'À partir de 75 000 XOF', '3 à 7 jours de production', true, 1),
+  ('33333333-3333-3333-3333-333333333302', 'Motion Design & Animation 2D/3D', 'motion-design', 'Création d''animations graphiques percutantes, titrages cinématiques, explainer videos, infographies animées et identités en mouvement.', 'Sparkles', 'À partir de 100 000 XOF', '4 à 10 jours de production', true, 2),
+  ('33333333-3333-3333-3333-333333333303', 'Contenus Verticaux & Social Media', 'social-media', 'Reels, TikToks et Shorts calibrés pour maximiser l''engagement et le taux de complétion avec transitions millimétrées et sous-titrages animés sur-mesure.', 'Smartphone', 'À partir de 25 000 XOF', '24 à 48 heures', true, 3),
+  ('33333333-3333-3333-3333-333333333304', 'Vidéo Corporate & Événementiel', 'video-corporate', 'Valorisation de votre marque employeur, reportages d''entreprise, lancements de produit et aftermovies événementiels à forte valeur émotionnelle.', 'Building2', 'Sur devis (dès 150 000 XOF)', '5 à 12 jours de production', true, 4)
 ON CONFLICT (id) DO NOTHING;
 
 -- Projects

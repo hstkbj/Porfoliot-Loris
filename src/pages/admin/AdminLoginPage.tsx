@@ -3,7 +3,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { useToast } from '../../components/ui/toast';
-import { Lock, ArrowLeft, ShieldCheck, Key } from 'lucide-react';
+import { Lock, ArrowLeft } from 'lucide-react';
 
 interface AdminLoginPageProps {
   onBackToSite: () => void;
@@ -12,8 +12,8 @@ interface AdminLoginPageProps {
 export function AdminLoginPage({ onBackToSite }: AdminLoginPageProps) {
   const { login } = useAuth();
   const { toast } = useToast();
-  const [email, setEmail] = useState('admin@studio.com');
-  const [password, setPassword] = useState('Admin2026!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -39,11 +39,6 @@ export function AdminLoginPage({ onBackToSite }: AdminLoginPageProps) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleFillDemo = () => {
-    setEmail('admin@studio.com');
-    setPassword('Admin2026!');
   };
 
   return (
@@ -88,6 +83,7 @@ export function AdminLoginPage({ onBackToSite }: AdminLoginPageProps) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@studio.com"
               required
+              autoComplete="username"
             />
           </div>
 
@@ -101,6 +97,7 @@ export function AdminLoginPage({ onBackToSite }: AdminLoginPageProps) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
+              autoComplete="current-password"
             />
           </div>
 
@@ -109,32 +106,11 @@ export function AdminLoginPage({ onBackToSite }: AdminLoginPageProps) {
             variant="accent"
             size="lg"
             isLoading={isLoading}
-            className="w-full justify-center text-sm font-semibold"
+            className="w-full justify-center text-sm font-semibold mt-2"
           >
             Se connecter
           </Button>
         </form>
-
-        {/* Demo hints */}
-        <div className="rounded-xl border border-zinc-850 bg-zinc-900/60 p-4 space-y-2 text-xs text-zinc-400">
-          <div className="flex items-center justify-between">
-            <span className="font-semibold text-zinc-300 flex items-center gap-1.5 font-mono text-[11px]">
-              <Key className="h-3.5 w-3.5 text-amber-400" />
-              Identifiants par défaut
-            </span>
-            <button
-              onClick={handleFillDemo}
-              className="text-[11px] text-amber-400 hover:underline cursor-pointer"
-            >
-              Remplir
-            </button>
-          </div>
-          <p className="text-[11px] font-mono text-zinc-400">
-            Email : <span className="text-zinc-200">admin@studio.com</span>
-            <br />
-            Mot de passe : <span className="text-zinc-200">Admin2026!</span>
-          </p>
-        </div>
       </div>
     </div>
   );

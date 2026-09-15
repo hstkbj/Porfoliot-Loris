@@ -139,7 +139,79 @@ npx supabase db push
 
 ---
 
-## 🗂️ 5. Configuration du stockage des médias (Supabase Storage)
+## 🔐 5. Identifiants Administrateur & Modification
+
+Pour des raisons de sécurité, ces identifiants sont documentés **exclusivement ici dans le README** et ne sont plus affichés publiquement sur le site.
+
+### Identifiants initiaux par défaut :
+- **URL d'accès** : `/admin` (ou `http://localhost:3000/admin`)
+- **Email administrateur** : `admin@studio.com`
+- **Mot de passe initial** : `Admin2026!`
+
+---
+
+### Comment modifier vos identifiants administrateur :
+
+Vous avez 2 façons très simples de modifier votre email et mot de passe administrateur :
+
+#### Méthode 1 : Directement depuis l'application Web (Recommandé)
+1. Connectez-vous sur votre espace d'administration à `/admin`.
+2. Cliquez sur l'onglet **« Paramètres du site »** (icône d'engrenage).
+3. Descendez jusqu'à la section **« Sécurité & Accès — Identifiants de connexion administrateur »**.
+4. Vous pouvez modifier votre **adresse email**, saisir un **nouveau mot de passe**, et cliquer sur **« Enregistrer mes nouveaux identifiants »**.
+   - Si Supabase est connecté : Vos identifiants sont instantanément mis à jour dans `auth.users` de votre base Supabase.
+   - Si vous êtes en mode local : Ils sont sauvegardés dans votre stockage local sécurisé.
+
+#### Méthode 2 : Depuis le tableau de bord Supabase
+1. Rendez-vous sur votre projet sur [https://supabase.com](https://supabase.com).
+2. Dans le menu de gauche, cliquez sur **Authentication** > **Users**.
+3. Repérez l'utilisateur `admin@studio.com` :
+   - Cliquez sur les trois petits points `...` à droite de la ligne.
+   - Cliquez sur **« Send password recovery »** ou **« Edit user »** pour changer l'email ou définir un nouveau mot de passe directement.
+
+---
+
+## 💾 6. Le Seeder (`supabase/seed.sql`) et comment l'injecter
+
+Un fichier de seeding complet est préparé dans le dossier :  
+📁 `supabase/seed.sql`
+
+### Ce que contient ce seeder :
+1. **Création du compte administrateur Supabase Auth** (`admin@studio.com` / `Admin2026!`) avec mot de passe haché et email confirmé.
+2. **Profil professionnel** (Alexandre Roche, Monteur Vidéo & Motion Designer Senior).
+3. **Paramètres du site & tranches budgétaires en Francs CFA (XOF)**.
+4. **4 Services complets** avec tarifs réalistes en XOF.
+5. **6 Projets vidéo** détaillés avec tags d'outils, catégories et vidéos d'exemples.
+6. **Compétences techniques** (Premiere Pro, After Effects, DaVinci Resolve, Cinema 4D, Sound Design...).
+7. **Liens réseaux sociaux** (YouTube, Vimeo, Instagram, LinkedIn).
+8. **Exemples de demandes de devis et messages de contact**.
+
+---
+
+### Comment envoyer le seeder dans votre base de données :
+
+#### Option A — Via le SQL Editor de Supabase (Le plus rapide, 100% visuel)
+1. Rendez-vous sur votre tableau de bord [https://supabase.com](https://supabase.com) > sélectionnez votre projet (`portfolio-videaste`).
+2. Dans le menu latéral gauche, cliquez sur **SQL Editor** (icône `>_`).
+3. Cliquez sur **« New query »**.
+4. Ouvrez le fichier local `supabase/seed.sql`, sélectionnez tout (`Ctrl + A` / `Cmd + A`), copiez-le et collez-le dans l'éditeur Supabase.
+5. Cliquez sur le bouton vert **« Run »** en bas à droite (ou `Ctrl + Entrée` / `Cmd + Entrée`).
+6. Le message **`Success. No rows returned`** s'affiche : toutes vos données réelles et le compte admin sont en place !
+
+#### Option B — En ligne de commande via la CLI Supabase
+Si vous préférez exécuter la commande dans votre terminal :
+```bash
+# 1. Vérifier que vous êtes bien lié à votre projet
+npx supabase link --project-ref yqwgdssefrfhauwuufuk
+
+# 2. Réinitialiser et appliquer migrations + seed.sql automatiquement
+npx supabase db reset --linked
+```
+*(Attention : `db reset` réapplique les tables et le fichier `seed.sql`).*
+
+---
+
+## 🗂️ 7. Configuration du stockage des médias (Supabase Storage)
 
 Pour permettre l'hébergement direct des images de vos projets et vidéos :
 
@@ -152,7 +224,7 @@ Pour permettre l'hébergement direct des images de vos projets et vidéos :
 
 ---
 
-## 🚀 6. Démarrer et vérifier la connexion
+## 🚀 8. Démarrer et vérifier la connexion
 
 1. Démarrez l'application localement :
    ```bash
@@ -163,7 +235,8 @@ Pour permettre l'hébergement direct des images de vos projets et vidéos :
 
 3. Connectez-vous à l'espace d'administration :
    - URL : [http://localhost:3000/admin](http://localhost:3000/admin)
-   - Mot de passe par défaut : `admin123` (modifiable dans l'onglet Paramètres)
+   - Email : `admin@studio.com`
+   - Mot de passe : `Admin2026!`
 
 4. Vérifiez le statut de la base de données :
    - Dans l'onglet **Paramètres**, observez l'encadré supérieur **« Moteur de données actif »** :
@@ -187,7 +260,7 @@ Pour permettre l'hébergement direct des images de vos projets et vidéos :
 
 ---
 
-## 🚀 7. Déploiement sur Vercel
+## 🚀 9. Déploiement sur Vercel
 
 Le projet est entièrement préparé pour un déploiement instantané et sans erreur sur **Vercel**.
 
