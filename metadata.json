@@ -1,0 +1,6 @@
+{
+  "name": "Portfolio Monteur Vidéo & Motion Designer",
+  "description": "Portfolio professionnel moderne et espace d'administration complet pour monteur vidéo et motion designer.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
