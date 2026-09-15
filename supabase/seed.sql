@@ -5,7 +5,7 @@
 -- 1. CRÉATION DU COMPTE ADMINISTRATEUR SUPABASE AUTH
 -- Identifiants initiaux : admin@studio.com / Admin2026!
 -- ==============================================================================
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA extensions;
 
 DO $$
 DECLARE
@@ -38,7 +38,7 @@ BEGIN
       'authenticated',
       'authenticated',
       admin_email,
-      crypt(admin_password, gen_salt('bf')),
+      extensions.crypt(admin_password, extensions.gen_salt('bf')),
       NOW(),
       NOW(),
       NOW(),

@@ -4,8 +4,8 @@
 -- ==============================================================================
 
 -- Enable UUID extension (pgcrypto provides gen_random_uuid, built-in in modern PostgreSQL)
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
 
 -- 1. PROFILES
 CREATE TABLE IF NOT EXISTS public.profiles (
