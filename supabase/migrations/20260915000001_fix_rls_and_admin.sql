@@ -3,6 +3,20 @@
 
 DO $$
 BEGIN
+  -- Alter tables if needed
+  ALTER TABLE IF EXISTS public.resume ADD COLUMN IF NOT EXISTS file_size TEXT;
+
+  -- Ensure buckets exist and are public
+  INSERT INTO storage.buckets (id, name, public)
+  VALUES 
+    ('profile', 'profile', true),
+    ('projects', 'projects', true),
+    ('services', 'services', true),
+    ('resume', 'resume', true),
+    ('documents', 'documents', true),
+    ('attachments', 'attachments', false)
+  ON CONFLICT (id) DO UPDATE SET public = EXCLUDED.public;
+
   -- Profiles
   DROP POLICY IF EXISTS "Admin profiles full" ON public.profiles;
   CREATE POLICY "Admin profiles full" ON public.profiles FOR ALL USING (true) WITH CHECK (true);
@@ -23,6 +37,14 @@ BEGIN
   DROP POLICY IF EXISTS "Admin services full" ON public.services;
   CREATE POLICY "Admin services full" ON public.services FOR ALL USING (true) WITH CHECK (true);
 
+  -- Service Requests
+  DROP POLICY IF EXISTS "Admin service_requests full" ON public.service_requests;
+  CREATE POLICY "Admin service_requests full" ON public.service_requests FOR ALL USING (true) WITH CHECK (true);
+
+  -- Contact Messages
+  DROP POLICY IF EXISTS "Admin contact_messages full" ON public.contact_messages;
+  CREATE POLICY "Admin contact_messages full" ON public.contact_messages FOR ALL USING (true) WITH CHECK (true);
+
   -- Resume
   DROP POLICY IF EXISTS "Admin resume full" ON public.resume;
   CREATE POLICY "Admin resume full" ON public.resume FOR ALL USING (true) WITH CHECK (true);
@@ -35,11 +57,13 @@ BEGIN
   DROP POLICY IF EXISTS "Admin skills full" ON public.skills;
   CREATE POLICY "Admin skills full" ON public.skills FOR ALL USING (true) WITH CHECK (true);
 
-  -- Storage objects upload/update/delete
+  -- Storage objects read/upload/update/delete
+  DROP POLICY IF EXISTS "Public storage read all" ON storage.objects;
   DROP POLICY IF EXISTS "Admin storage upload" ON storage.objects;
   DROP POLICY IF EXISTS "Admin storage update" ON storage.objects;
   DROP POLICY IF EXISTS "Admin storage delete" ON storage.objects;
 
+  CREATE POLICY "Public storage read all" ON storage.objects FOR SELECT USING (bucket_id IN ('profile', 'projects', 'services', 'resume', 'documents'));
   CREATE POLICY "Admin storage upload" ON storage.objects FOR INSERT WITH CHECK (true);
   CREATE POLICY "Admin storage update" ON storage.objects FOR UPDATE USING (true);
   CREATE POLICY "Admin storage delete" ON storage.objects FOR DELETE USING (true);

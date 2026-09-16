@@ -38,7 +38,8 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<Profile>) => api.updateProfile(data),
-    onSuccess: () => {
+    onSuccess: (updatedData) => {
+      queryClient.setQueryData(QUERY_KEYS.PROFILE, updatedData);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PROFILE });
     },
   });
@@ -56,7 +57,8 @@ export function useUpdateSiteSettings() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: Partial<SiteSettings>) => api.updateSiteSettings(data),
-    onSuccess: () => {
+    onSuccess: (updatedData) => {
+      queryClient.setQueryData(QUERY_KEYS.SETTINGS, updatedData);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SETTINGS });
     },
   });

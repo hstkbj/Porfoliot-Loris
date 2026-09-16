@@ -43,7 +43,7 @@ export function Navbar({ currentPath, onNavigate }: NavbarProps) {
               {settings?.site_name || profile?.professional_name || 'Studio'}
             </span>
             <span className="text-[10px] tracking-wider text-zinc-400 uppercase font-mono">
-              {profile?.job_title ? profile.job_title.split(' ')[0] + ' & Motion' : 'Monteur Vidéo'}
+              {profile?.job_title || 'Monteur Vidéo & Motion'}
             </span>
           </div>
         </button>

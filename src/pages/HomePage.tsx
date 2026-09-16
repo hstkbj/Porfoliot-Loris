@@ -37,18 +37,26 @@ export function HomePage({ onNavigate }: HomePageProps) {
 
               {/* Eyebrow / Profession */}
               <h2 className="text-xs md:text-sm font-semibold tracking-widest text-amber-400 uppercase font-mono">
-                {profile?.hero_title || 'MONTEUR VIDÉO & MOTION DESIGNER'}
+                {profile?.hero_title || profile?.job_title || 'MONTEUR VIDÉO & MOTION DESIGNER'}
               </h2>
 
               {/* Main Headline */}
               <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-zinc-100 leading-[1.1]">
-                Je façonne vos idées en{' '}
-                <span className="text-zinc-400">récits visuels</span> qui captent l’attention.
+                {profile?.short_bio ? (
+                  profile.short_bio
+                ) : (
+                  <>
+                    Je façonne vos idées en{' '}
+                    <span className="text-zinc-400">récits visuels</span> qui captent l’attention.
+                  </>
+                )}
               </h1>
 
               {/* Hero description */}
               <p className="text-base sm:text-lg text-zinc-400 max-w-xl leading-relaxed">
                 {profile?.hero_description ||
+                  profile?.bio ||
+                  settings?.site_description ||
                   'Du spot publicitaire percutant à l’habillage motion design complet. Rythme chirurgical, colorimétrie maîtrisée et sound design immersif.'}
               </p>
 

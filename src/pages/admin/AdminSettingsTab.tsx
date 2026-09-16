@@ -22,8 +22,17 @@ import {
   ArrowDown,
   RotateCcw,
   Sparkles,
+  Activity,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
+  Copy,
+  Check,
+  Server,
+  CloudUpload,
 } from 'lucide-react';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import { api, DatabaseHealthReport } from '../../services/api';
 
 const PRESET_TIERS = {
   accessible: [
@@ -73,6 +82,107 @@ export function AdminSettingsTab() {
   const [budgetTiers, setBudgetTiers] = useState<string[]>(DEFAULT_BUDGET_TIERS);
   const [newTierInput, setNewTierInput] = useState('');
   const [isSavingTiers, setIsSavingTiers] = useState(false);
+
+  // Database Health & Sync State
+  const [healthReport, setHealthReport] = useState<DatabaseHealthReport | null>(null);
+  const [isCheckingHealth, setIsCheckingHealth] = useState(false);
+  const [isSyncingAll, setIsSyncingAll] = useState(false);
+  const [copiedSql, setCopiedSql] = useState(false);
+
+  const runDatabaseCheck = async () => {
+    setIsCheckingHealth(true);
+    try {
+      const report = await api.checkDatabaseHealth();
+      setHealthReport(report);
+      if (report.overallStatus === 'healthy') {
+        toast({
+          title: 'Base de données connectée',
+          message: `Test réussi en ${report.latencyMs}ms — Toutes les tables sont opérationnelles.`,
+          type: 'success',
+        });
+      }
+    } catch (e: any) {
+      toast({
+        title: 'Erreur diagnostic',
+        message: e?.message || 'Échec de la vérification de la base de données.',
+        type: 'error',
+      });
+    } finally {
+      setIsCheckingHealth(false);
+    }
+  };
+
+  useEffect(() => {
+    runDatabaseCheck();
+  }, []);
+
+  const handleSyncAll = async () => {
+    setIsSyncingAll(true);
+    try {
+      const res = await api.syncAllToSupabase();
+      if (res.success) {
+        toast({
+          title: 'Synchronisation complète !',
+          message: `Vos données sont synchronisées sur Supabase : ${res.syncedTables.join(', ')}.`,
+          type: 'success',
+        });
+        await runDatabaseCheck();
+      } else {
+        toast({
+          title: 'Synchronisation partielle',
+          message: `Erreurs: ${res.errors.join(', ')}`,
+          type: 'error',
+        });
+      }
+    } catch (e: any) {
+      toast({
+        title: 'Erreur synchronisation',
+        message: e?.message || 'Erreur lors de la synchronisation.',
+        type: 'error',
+      });
+    } finally {
+      setIsSyncingAll(false);
+    }
+  };
+
+  const copyMigrationSql = () => {
+    const sql = `-- Script d'alignement complet des permissions & tables Supabase
+ALTER TABLE IF EXISTS public.resume ADD COLUMN IF NOT EXISTS file_size TEXT;
+
+INSERT INTO storage.buckets (id, name, public)
+VALUES 
+  ('profile', 'profile', true),
+  ('projects', 'projects', true),
+  ('services', 'services', true),
+  ('resume', 'resume', true),
+  ('documents', 'documents', true)
+ON CONFLICT (id) DO UPDATE SET public = EXCLUDED.public;
+
+CREATE POLICY "Admin profiles full" ON public.profiles FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin site_settings full" ON public.site_settings FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin projects full" ON public.projects FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin project_media full" ON public.project_media FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin services full" ON public.services FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin service_requests full" ON public.service_requests FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin contact_messages full" ON public.contact_messages FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin resume full" ON public.resume FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin social_links full" ON public.social_links FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Admin skills full" ON public.skills FOR ALL USING (true) WITH CHECK (true);
+
+CREATE POLICY "Public storage read all" ON storage.objects FOR SELECT USING (true);
+CREATE POLICY "Admin storage upload" ON storage.objects FOR INSERT WITH CHECK (true);
+CREATE POLICY "Admin storage update" ON storage.objects FOR UPDATE USING (true);
+CREATE POLICY "Admin storage delete" ON storage.objects FOR DELETE USING (true);`;
+
+    navigator.clipboard.writeText(sql);
+    setCopiedSql(true);
+    toast({
+      title: 'Script SQL copié !',
+      message: 'Vous pouvez le coller dans Supabase > SQL Editor si nécessaire.',
+      type: 'success',
+    });
+    setTimeout(() => setCopiedSql(false), 3000);
+  };
 
   const {
     register,
@@ -345,6 +455,40 @@ export function AdminSettingsTab() {
           </div>
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-zinc-800/60">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-zinc-300">Titre SEO (Balise titre dans l'onglet)</label>
+            <Input {...register('seo_title')} placeholder="Alexandre Roche — Réalisateur & Vidéaste Commercial" />
+            {errors.seo_title && (
+              <p className="text-xs text-red-400">{errors.seo_title.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-zinc-300">Couleur d'accentuation principale</label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="color"
+                {...register('primary_color')}
+                className="w-12 h-9 p-1 bg-zinc-900 border-zinc-800 rounded cursor-pointer"
+              />
+              <Input
+                {...register('primary_color')}
+                placeholder="#f59e0b"
+                className="font-mono text-xs"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-zinc-300">Description SEO (Google & Réseaux)</label>
+          <Textarea {...register('seo_description')} rows={2} placeholder="Portfolio officiel de réalisation vidéo, publicité, films de marque et fiction." />
+          {errors.seo_description && (
+            <p className="text-xs text-red-400">{errors.seo_description.message}</p>
+          )}
+        </div>
+
         <div className="space-y-1">
           <label className="text-xs font-medium text-zinc-300">Mention de Copyright *</label>
           <Input {...register('copyright_text')} placeholder="© 2026 Alexandre Roche. Tous droits réservés." />
@@ -352,6 +496,12 @@ export function AdminSettingsTab() {
             <p className="text-xs text-red-400">{errors.copyright_text.message}</p>
           )}
         </div>
+
+        {Object.keys(errors).length > 0 && (
+          <div className="rounded-lg bg-red-500/10 border border-red-500/30 p-3 text-xs text-red-400">
+            Veuillez vérifier les champs obligatoires ci-dessus avant d'enregistrer.
+          </div>
+        )}
 
         <div className="flex justify-end pt-2">
           <Button
@@ -608,6 +758,185 @@ export function AdminSettingsTab() {
           </Button>
         </div>
       </form>
+
+      {/* Database & Supabase Health & Sync Card */}
+      <div className="rounded-xl border border-zinc-800 bg-[#121417] p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Database className="h-5 w-5 text-amber-400" />
+              <h3 className="font-display text-sm font-bold uppercase tracking-wider font-mono text-zinc-100">
+                Centre de Contrôle & Diagnostic Base de Données (Supabase)
+              </h3>
+            </div>
+            <p className="text-xs text-zinc-400">
+              Vérification en temps réel de la connexion, des tables, des permissions RLS et de l'intégrité des données.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={runDatabaseCheck}
+              isLoading={isCheckingHealth}
+              className="text-xs gap-1.5"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isCheckingHealth ? 'animate-spin' : ''}`} />
+              <span>Tester la connexion</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="accent"
+              size="sm"
+              onClick={handleSyncAll}
+              isLoading={isSyncingAll}
+              className="text-xs gap-1.5"
+            >
+              <CloudUpload className="h-3.5 w-3.5" />
+              <span>Synchroniser vers Supabase</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Status Summary Banner */}
+        {healthReport ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="rounded-lg bg-black/40 border border-zinc-800 p-3.5 space-y-1">
+                <span className="text-[11px] font-mono text-zinc-500 uppercase block">État de communication</span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`h-2.5 w-2.5 rounded-full ${
+                      healthReport.overallStatus === 'healthy'
+                        ? 'bg-emerald-400 animate-pulse'
+                        : healthReport.overallStatus === 'warning'
+                        ? 'bg-amber-400'
+                        : 'bg-red-500'
+                    }`}
+                  />
+                  <span className="font-semibold text-xs text-zinc-200">
+                    {healthReport.overallStatus === 'healthy'
+                      ? 'Opérationnel & Accessible'
+                      : healthReport.overallStatus === 'warning'
+                      ? 'Attention requise'
+                      : 'Erreur détectée'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-black/40 border border-zinc-800 p-3.5 space-y-1">
+                <span className="text-[11px] font-mono text-zinc-500 uppercase block">Latence réseau</span>
+                <div className="flex items-center gap-2">
+                  <Activity className="h-4 w-4 text-amber-400" />
+                  <span className="font-mono text-xs font-semibold text-zinc-200">
+                    {healthReport.latencyMs} ms
+                  </span>
+                </div>
+              </div>
+
+              <div className="rounded-lg bg-black/40 border border-zinc-800 p-3.5 space-y-1">
+                <span className="text-[11px] font-mono text-zinc-500 uppercase block">Mode de persistance</span>
+                <div className="flex items-center gap-2">
+                  <Server className="h-4 w-4 text-emerald-400" />
+                  <span className="text-xs font-semibold text-zinc-200">
+                    {isSupabaseConfigured ? 'Supabase + Cache local sécurisé' : 'Local Storage Autonome'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Table Details Grid */}
+            <div className="space-y-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono block">
+                État des 10 Tables de données
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
+                {healthReport.tables.map((tbl) => (
+                  <div
+                    key={tbl.name}
+                    className="rounded-lg border border-zinc-800/80 bg-zinc-900/40 p-2.5 flex flex-col justify-between"
+                  >
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="font-mono text-xs text-zinc-300 truncate">{tbl.name}</span>
+                      {tbl.status === 'ok' ? (
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 flex-shrink-0" />
+                      ) : (
+                        <AlertTriangle className="h-3.5 w-3.5 text-amber-400 flex-shrink-0" />
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-zinc-500">
+                      <span>{tbl.status === 'ok' ? 'Actif' : 'Vérifier'}</span>
+                      {tbl.rowCount !== undefined && (
+                        <span className="font-mono text-zinc-400">{tbl.rowCount} lignes</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Storage Buckets */}
+            {healthReport.storageBuckets.length > 0 && (
+              <div className="space-y-2 pt-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-zinc-300 font-mono block">
+                  Dossiers de stockage de fichiers (Buckets)
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {healthReport.storageBuckets.map((b) => (
+                    <div
+                      key={b.name}
+                      className="rounded-lg border border-zinc-800/60 bg-zinc-900/30 p-2 text-center"
+                    >
+                      <span className="font-mono text-xs text-zinc-300 block">{b.name}</span>
+                      <span
+                        className={`text-[10px] ${
+                          b.status === 'ok' ? 'text-emerald-400' : 'text-zinc-500'
+                        }`}
+                      >
+                        {b.status === 'ok' ? 'Accessible' : 'En attente'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recommendations & Action script */}
+            {healthReport.recommendations.length > 0 && (
+              <div className="rounded-lg bg-black/30 border border-zinc-800 p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-amber-400 flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    Recommandations d'alignement Supabase
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={copyMigrationSql}
+                    className="text-xs gap-1.5 h-7 text-zinc-300 hover:text-white"
+                  >
+                    {copiedSql ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                    <span>{copiedSql ? 'Copié !' : 'Copier le script SQL complet'}</span>
+                  </Button>
+                </div>
+                <ul className="text-xs text-zinc-400 space-y-1 list-disc list-inside">
+                  {healthReport.recommendations.map((rec, i) => (
+                    <li key={i}>{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="py-6 text-center text-xs text-zinc-500">
+            Initialisation du diagnostic de la base de données...
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -108,7 +108,7 @@ export const initialProjects: Project[] = [
     display_order: 1,
     media: [
       {
-        id: 'm1',
+        id: '44444444-4444-4444-4444-4444444444a1',
         project_id: '44444444-4444-4444-4444-444444444401',
         media_type: 'image',
         media_url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1200&q=80',
@@ -116,7 +116,7 @@ export const initialProjects: Project[] = [
         display_order: 1,
       },
       {
-        id: 'm2',
+        id: '44444444-4444-4444-4444-4444444444a2',
         project_id: '44444444-4444-4444-4444-444444444401',
         media_type: 'image',
         media_url: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1200&q=80',
@@ -208,22 +208,22 @@ export const initialProjects: Project[] = [
 ];
 
 export const initialSkills: Skill[] = [
-  { id: 's1', name: 'Adobe Premiere Pro', category: 'Logiciel', level: 98, display_order: 1, active: true },
-  { id: 's2', name: 'Adobe After Effects', category: 'Logiciel', level: 95, display_order: 2, active: true },
-  { id: 's3', name: 'DaVinci Resolve & Fusion', category: 'Logiciel', level: 90, display_order: 3, active: true },
-  { id: 's4', name: 'Cinema 4D / Blender', category: 'Logiciel', level: 82, display_order: 4, active: true },
-  { id: 's5', name: 'Montage Rythmique & Narratif', category: 'Montage', level: 96, display_order: 5, active: true },
-  { id: 's6', name: 'Animation Typographique (Kinetic)', category: 'Motion Design', level: 94, display_order: 6, active: true },
-  { id: 's7', name: 'Sound Design & Mixage Audio', category: 'Audio & Étalonnage', level: 92, display_order: 7, active: true },
-  { id: 's8', name: 'Étalonnage Chromatique (Color Grading)', category: 'Audio & Étalonnage', level: 88, display_order: 8, active: true },
+  { id: '55555555-5555-5555-5555-555555555501', name: 'Adobe Premiere Pro', category: 'Logiciel', level: 98, display_order: 1, active: true },
+  { id: '55555555-5555-5555-5555-555555555502', name: 'Adobe After Effects', category: 'Logiciel', level: 95, display_order: 2, active: true },
+  { id: '55555555-5555-5555-5555-555555555503', name: 'DaVinci Resolve & Fusion', category: 'Logiciel', level: 90, display_order: 3, active: true },
+  { id: '55555555-5555-5555-5555-555555555504', name: 'Cinema 4D / Blender', category: 'Logiciel', level: 82, display_order: 4, active: true },
+  { id: '55555555-5555-5555-5555-555555555505', name: 'Montage Rythmique & Narratif', category: 'Montage', level: 96, display_order: 5, active: true },
+  { id: '55555555-5555-5555-5555-555555555506', name: 'Animation Typographique (Kinetic)', category: 'Motion Design', level: 94, display_order: 6, active: true },
+  { id: '55555555-5555-5555-5555-555555555507', name: 'Sound Design & Mixage Audio', category: 'Audio & Étalonnage', level: 92, display_order: 7, active: true },
+  { id: '55555555-5555-5555-5555-555555555508', name: 'Étalonnage Chromatique (Color Grading)', category: 'Audio & Étalonnage', level: 88, display_order: 8, active: true },
 ];
 
 export const initialSocialLinks: SocialLink[] = [
-  { id: 'sl1', platform: 'Vimeo', url: 'https://vimeo.com', active: true, display_order: 1 },
-  { id: 'sl2', platform: 'Behance', url: 'https://behance.net', active: true, display_order: 2 },
-  { id: 'sl3', platform: 'LinkedIn', url: 'https://linkedin.com', active: true, display_order: 3 },
-  { id: 'sl4', platform: 'Instagram', url: 'https://instagram.com', active: true, display_order: 4 },
-  { id: 'sl5', platform: 'YouTube', url: 'https://youtube.com', active: true, display_order: 5 },
+  { id: '66666666-6666-6666-6666-666666666601', platform: 'Vimeo', url: 'https://vimeo.com', active: true, display_order: 1 },
+  { id: '66666666-6666-6666-6666-666666666602', platform: 'Behance', url: 'https://behance.net', active: true, display_order: 2 },
+  { id: '66666666-6666-6666-6666-666666666603', platform: 'LinkedIn', url: 'https://linkedin.com', active: true, display_order: 3 },
+  { id: '66666666-6666-6666-6666-666666666604', platform: 'Instagram', url: 'https://instagram.com', active: true, display_order: 4 },
+  { id: '66666666-6666-6666-6666-666666666605', platform: 'YouTube', url: 'https://youtube.com', active: true, display_order: 5 },
 ];
 
 export const initialResume: Resume = {
@@ -236,7 +236,7 @@ export const initialResume: Resume = {
 
 export const initialServiceRequests: ServiceRequest[] = [
   {
-    id: 'req1',
+    id: '88888888-8888-8888-8888-888888888801',
     full_name: 'Sophie Delorme',
     email: 's.delorme@atelier-lumiere.com',
     phone: '+33 6 12 34 56 78',
@@ -250,7 +250,7 @@ export const initialServiceRequests: ServiceRequest[] = [
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
   },
   {
-    id: 'req2',
+    id: '88888888-8888-8888-8888-888888888802',
     full_name: 'Marc Levêque',
     email: 'marc@pulsar-digital.io',
     phone: '+33 7 89 01 23 45',
@@ -267,7 +267,7 @@ export const initialServiceRequests: ServiceRequest[] = [
 
 export const initialContactMessages: ContactMessage[] = [
   {
-    id: 'msg1',
+    id: '99999999-9999-9999-9999-999999999901',
     name: 'Julien Mercier',
     email: 'j.mercier@creative-agency.fr',
     phone: '+33 6 55 44 33 22',
@@ -277,7 +277,7 @@ export const initialContactMessages: ContactMessage[] = [
     created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
   },
   {
-    id: 'msg2',
+    id: '99999999-9999-9999-9999-999999999902',
     name: 'Camille Faure',
     email: 'camille.faure@festival-film.org',
     subject: 'Habillage festival du film court',
